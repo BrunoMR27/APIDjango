@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-61jjul!0azet4@vi_88sdgrz@n&!51okp3gf(hvq$rz0xclb+3
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['https://apidjango-lnxq.onrender.com', 'localhost', '127.0.0.1']
 
 
 # Application definition
