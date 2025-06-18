@@ -1,31 +1,36 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from django.core.files.storage import default_storage
-import os
-import random
+import os, tempfile, random
 
 @api_view(['POST'])
 def analizar_imagen(request):
-    if 'imagen' not in request.FILES:
-        return Response({'error': 'No se recibió ninguna imagen'}, status=400)
+    try:
+        if 'imagen' not in request.FILES:
+            return Response({'error': 'No se recibió ninguna imagen'}, status=400)
 
-    imagen = request.FILES['imagen']
-    path = default_storage.save('tmp/' + imagen.name, imagen)
-    ruta_completa = os.path.join(default_storage.location, path)
+        imagen = request.FILES['imagen']
 
-    # 🔽 Simulación de análisis de IMC
-    imc = round(random.uniform(16.0, 35.0), 1)
+        # Guardar temporalmente la imagen (funciona en Render)
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.jpg') as tmp:
+            for chunk in imagen.chunks():
+                tmp.write(chunk)
+            ruta_completa = tmp.name
 
-    if imc < 18.5:
-        clasificacion = "Bajo peso"
-    elif 18.5 <= imc < 25:
-        clasificacion = "Peso normal"
-    elif 25 <= imc < 30:
-        clasificacion = "Sobrepeso"
-    else:
-        clasificacion = "Obesidad"
+        # Simulación del análisis de IMC
+        imc = round(random.uniform(16.0, 35.0), 1)
 
-    resultado = f"IMC: {imc} - {clasificacion}"
+        if imc < 18.5:
+            clasificacion = "Bajo peso"
+        elif 18.5 <= imc < 25:
+            clasificacion = "Peso normal"
+        elif 25 <= imc < 30:
+            clasificacion = "Sobrepeso"
+        else:
+            clasificacion = "Obesidad"
 
-    return Response({'resultado': resultado})
+        resultado = f"IMC: {imc} - {clasificacion}"
 
+        return Response({'resultado': resultado})
+    
+    except Exception as e:
+        return Response({'error': f'Error interno: {str(e)}'}, status=500)
